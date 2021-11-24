@@ -80,7 +80,7 @@ def login(request):
 
             return Response(data={"error": "User not found or password incorrect."}, status=status.HTTP_401_UNAUTHORIZED)
             
-@api_view(['GET', 'POST'])
+@api_view(['GET', 'POST', 'DELETE'])
 def rides(request):
 
     if (request.method == 'GET'):
@@ -127,3 +127,27 @@ def rides(request):
 
             serrialized = RideSerializer(ride, many=False)
             return Response(serrialized.data)
+
+    if (request.method == 'DELETE'):
+
+        keys = request.GET.keys()
+
+        if(not("access_token" in keys and "ride_id" in keys)):
+
+            return Response(data={"error": "Invalid form data."}, status=status.HTTP_400_BAD_REQUEST)
+
+        else:
+            
+            user = authorize_access_token(request.GET["access_token"])
+            
+            try:
+                
+                ride = user.rides.get(id=request.GET["ride_id"])
+            
+            except Ride.DoesNotExist:
+
+                return Response(data={"error": "Ride does not exist"}, status=status.HTTP_400_BAD_REQUEST)
+
+            ride.delete()
+
+            return Response(data={"message": "Ride deleted."})

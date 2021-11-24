@@ -9,5 +9,5 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 class RideSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Ride
-        fields = ['ride_title', 'origin', 'destination', 'time', 'price', 'created']
+        fields = ['id', 'ride_title', 'origin', 'destination', 'time', 'price', 'created']
 
