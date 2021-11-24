@@ -4,7 +4,8 @@ from main import views
 urlpatterns = [
 
     path('', include('rest_framework.urls')),
-    path("test", views.test),
-    path("users", views.get_all_users),
+    path("register", views.register),
+    path("login", views.login),
+    path("rides", views.rides),
 
 ]
