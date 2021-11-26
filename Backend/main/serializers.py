@@ -4,7 +4,7 @@ from main.models import AppUser, Ride
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = AppUser
-        fields = ['first_name', 'last_name', 'email', 'access_token']
+        fields = ['first_name', 'last_name', 'email', 'phone_number', 'access_token']
 
 class RideSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:

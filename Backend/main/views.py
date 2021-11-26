@@ -5,6 +5,7 @@ from main.serializers import UserSerializer, RideSerializer
 from main.models import AppUser, Ride
 from django.db import IntegrityError
 from uuid import uuid4
+from django.db.models import Q
 
 
 def authorize_access_token(at):
@@ -80,7 +81,7 @@ def login(request):
 
             return Response(data={"error": "User not found or password incorrect."}, status=status.HTTP_401_UNAUTHORIZED)
             
-@api_view(['GET', 'POST', 'DELETE'])
+@api_view(['GET', 'POST', 'DELETE', 'PATCH'])
 def rides(request):
 
     if (request.method == 'GET'):
@@ -92,10 +93,16 @@ def rides(request):
             return Response(data={"error": "Invalid form data."}, status=status.HTTP_400_BAD_REQUEST)
 
         else:
-            
+
             authorize_access_token(request.GET["access_token"])
 
-            rides = Ride.objects.all()
+            if ("query" in request.GET.keys()):
+
+                rides = Ride.objects.filter(Q(ride_title__icontains=request.GET["query"]) | Q(origin__icontains=request.GET["query"]) | Q(destination__icontains=request.GET["query"]))
+
+            else:
+
+                rides = Ride.objects.all()
 
             serrialized = RideSerializer(rides, many=True)
 
@@ -146,8 +153,87 @@ def rides(request):
             
             except Ride.DoesNotExist:
 
-                return Response(data={"error": "Ride does not exist"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response(data={"error": "Ride does not exist or you do not own it."}, status=status.HTTP_400_BAD_REQUEST)
 
             ride.delete()
 
             return Response(data={"message": "Ride deleted."})
+
+    if request.method == "PATCH":
+
+        keys = request.GET.keys()
+
+        if(not("access_token" in keys and "ride_id" in keys)):
+
+            return Response(data={"error": "Invalid form data."}, status=status.HTTP_400_BAD_REQUEST)
+
+            
+        user = authorize_access_token(request.GET["access_token"])
+
+        try:
+                
+            ride = user.rides.get(id=request.GET["ride_id"])
+            
+        except Ride.DoesNotExist:
+
+            return Response(data={"error": "Ride does not exist or you do not own it."}, status=status.HTTP_400_BAD_REQUEST)
+
+
+        valid_keys = ['ride_title', 'origin', 'destination', 'time', 'price']
+
+        for key in request.GET.keys():
+
+            if key != "access_token" and key in valid_keys:
+
+                setattr(ride, key, request.GET[key])
+
+        try:
+
+            ride.save()
+
+        except Exception as e:
+
+            return Response(data={"error": "Update failed, atleast one of the parameters was incorrect."}, status=status.HTTP_400_BAD_REQUEST)
+
+        serrialized = RideSerializer(ride, many=False)
+        return Response(serrialized.data)
+
+@api_view(['GET', 'PATCH', 'DELETE'])
+def account(request):
+
+    keys = request.GET.keys()
+
+    if(not("access_token" in keys)):
+
+        return Response(data={"error": "Invalid form data."}, status=status.HTTP_400_BAD_REQUEST)
+
+    user = authorize_access_token(request.GET["access_token"])
+
+    if request.method == "PATCH":
+
+        valid_keys = ['first_name', 'last_name', 'email', 'password', 'phone_number']
+
+        for key in request.GET.keys():
+
+            print(key in valid_keys)
+
+            if key != "access_token" and key in valid_keys:
+
+                setattr(user, key, request.GET[key])
+
+        try:
+
+            user.save()
+
+        except Exception as e:
+
+            return Response(data={"error": "Update failed, atleast one of the parameters was incorrect."}, status=status.HTTP_400_BAD_REQUEST)
+
+    if request.method == "DELETE":
+
+        user.delete()
+
+        return Response(data={"message": "User account deleted."})
+
+    serrialized = UserSerializer(user, many=False)
+    return Response(serrialized.data)
