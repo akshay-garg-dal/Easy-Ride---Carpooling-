@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-n%l47nf003q58)ndk)oiq0)w@w!p=a90s+upqsz6_%6iqfdzf)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['bypass.grantchesney.com']
 
 
 # Application definition
@@ -57,6 +57,10 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'Backend.urls'
 
 CORS_ORIGIN_ALLOW_ALL = True
+
+CORS_ALLOWED_ORIGINS = [
+    'http://bypass.grantchesney.com'
+]
 
 CORS_ALLOW_METHODS = [
     "DELETE",

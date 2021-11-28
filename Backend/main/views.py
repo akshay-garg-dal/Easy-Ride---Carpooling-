@@ -16,7 +16,7 @@ def authorize_access_token(at):
 
     except AppUser.DoesNotExist :
 
-        return Response(data={"error": "Invalid access token."}, status=status.HTTP_401_UNAUTHORIZED)
+        return False
 
     return user
 
@@ -94,7 +94,11 @@ def rides(request):
 
         else:
 
-            authorize_access_token(request.GET["access_token"])
+            user = authorize_access_token(request.GET["access_token"])
+
+            if not user:
+
+                return Response(data={"error": "Invalid access token."}, status=status.HTTP_401_UNAUTHORIZED)
 
             if ("query" in request.GET.keys()):
 
@@ -119,6 +123,10 @@ def rides(request):
         else:
             
             user = authorize_access_token(request.POST["access_token"])
+
+            if not user:
+
+                return Response(data={"error": "Invalid access token."}, status=status.HTTP_401_UNAUTHORIZED)
 
             ride = Ride()
             ride.ride_title = request.POST["ride_title"]
@@ -146,6 +154,10 @@ def rides(request):
         else:
             
             user = authorize_access_token(request.GET["access_token"])
+
+            if not user:
+
+                return Response(data={"error": "Invalid access token."}, status=status.HTTP_401_UNAUTHORIZED)
             
             try:
                 
@@ -169,6 +181,10 @@ def rides(request):
 
             
         user = authorize_access_token(request.GET["access_token"])
+
+        if not user:
+
+                return Response(data={"error": "Invalid access token."}, status=status.HTTP_401_UNAUTHORIZED)
 
         try:
                 
@@ -208,6 +224,10 @@ def account(request):
         return Response(data={"error": "Invalid form data."}, status=status.HTTP_400_BAD_REQUEST)
 
     user = authorize_access_token(request.GET["access_token"])
+
+    if not user:
+
+                return Response(data={"error": "Invalid access token."}, status=status.HTTP_401_UNAUTHORIZED)
 
     if request.method == "PATCH":
 
