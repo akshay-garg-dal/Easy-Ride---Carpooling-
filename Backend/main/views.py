@@ -100,9 +100,9 @@ def rides(request):
 
                 return Response(data={"error": "Invalid access token."}, status=status.HTTP_401_UNAUTHORIZED)
 
-            if ("ride_id" in request.GET.keys()):
+            elif ("ride_id" in request.GET.keys()):
 
-                rides = Ride.objects.filter(id=request.GET["ride_id"]).first()
+                rides = Ride.objects.get(id=request.GET["ride_id"])
             
             elif ("query" in request.GET.keys()):
 
